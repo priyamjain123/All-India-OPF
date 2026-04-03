@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>All India LMP Map</title>
-    <meta name="description" content="Simple interactive viewer for All India LMP maps.">
+    <meta name="description" content="Interactive All India LMP map viewer for uploaded OPF scenarios.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
@@ -13,21 +13,44 @@
 <body>
     <div class="page-shell">
         <header class="page-header">
-            <h1>All India LMP Map</h1>
+            <div>
+                <p class="eyebrow">National Grid Visualization</p>
+                <h1>All India LMP Map</h1>
+                <p class="page-note">Select a case and click <strong>Show LMP</strong> to load the corresponding All India scenario map.</p>
+            </div>
         </header>
 
-        <section class="selector-panel">
-            <label for="mapSelector">Case Selector</label>
-            <select id="mapSelector" aria-label="Case selector"></select>
+        <section class="control-panel">
+            <div class="selector-group">
+                <label for="mapSelector">Case Selector</label>
+                <select id="mapSelector" aria-label="Case selector"></select>
+            </div>
+            <button id="showMapButton" type="button">Show LMP</button>
         </section>
 
-        <section class="map-panel">
-            <iframe
-                id="mapFrame"
-                title="All India LMP map viewer"
-                loading="lazy"
-                referrerpolicy="no-referrer-when-downgrade">
-            </iframe>
+        <section class="map-card">
+            <div class="map-card-header">
+                <div>
+                    <p class="eyebrow">Selected Scenario</p>
+                    <h2 id="selectedMapTitle">Choose a case to view its LMP map</h2>
+                </div>
+                <span class="status-badge" id="mapStatus">Waiting</span>
+            </div>
+
+            <div class="map-stage" id="mapStage">
+                <div class="map-placeholder" id="mapPlaceholder">
+                    <div class="placeholder-box">
+                        <h3>LMP map is ready to load</h3>
+                        <p>Use the case selector above, then click <strong>Show LMP</strong> to display the selected All India map.</p>
+                    </div>
+                </div>
+                <iframe
+                    id="mapFrame"
+                    title="All India LMP map viewer"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
         </section>
     </div>
 
