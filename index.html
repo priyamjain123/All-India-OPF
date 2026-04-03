@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>All India OPF Map Portal</title>
-    <meta name="description" content="Interactive selector for All India OPF and LMP maps with embedded navigation-friendly views.">
+    <title>All India LMP Map</title>
+    <meta name="description" content="Simple interactive viewer for All India LMP maps.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
@@ -12,81 +12,23 @@
 </head>
 <body>
     <div class="page-shell">
-        <header class="topbar">
-            <div class="selector-block">
-                <label for="mapSelector">Map Selector</label>
-                <select id="mapSelector" aria-label="Select map"></select>
-            </div>
-
-            <div class="topbar-actions">
-                <button class="nav-button" id="previousMap" type="button">Previous</button>
-                <button class="nav-button" id="nextMap" type="button">Next</button>
-                <button class="nav-button" id="copyShareLink" type="button">Copy Link</button>
-            </div>
+        <header class="page-header">
+            <h1>All India LMP Map</h1>
         </header>
 
-        <main class="layout">
-            <aside class="sidebar">
-                <section class="sidebar-card">
-                    <div class="sidebar-head">
-                        <div>
-                            <p class="section-label">Case Details</p>
-                            <h2 id="mapTitle">Loading map...</h2>
-                        </div>
-                        <span class="status-pill" id="mapStatus">Ready</span>
-                    </div>
+        <section class="selector-panel">
+            <label for="mapSelector">Case Selector</label>
+            <select id="mapSelector" aria-label="Case selector"></select>
+        </section>
 
-                    <div class="detail-list">
-                        <div class="detail-item">
-                            <span class="detail-label">Case</span>
-                            <strong id="detailCase">-</strong>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Region</span>
-                            <strong id="detailRegion">-</strong>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Metric</span>
-                            <strong id="detailMetric">-</strong>
-                        </div>
-                        <div class="detail-item">
-                            <span class="detail-label">Map File</span>
-                            <strong id="detailFilename">-</strong>
-                        </div>
-                    </div>
-
-                    <p class="map-description" id="mapDescription"></p>
-
-                    <div class="sidebar-links">
-                        <a class="action-link primary-link" id="openSelectedMap" href="#" target="_blank" rel="noopener noreferrer">Open Selected Map</a>
-                        <a class="action-link" id="directMapLink" href="#" target="_blank" rel="noopener noreferrer">Open map in full tab</a>
-                        <a class="action-link" href="https://github.com/priyamjain123/All-India-OPF" target="_blank" rel="noopener noreferrer">View GitHub Repository</a>
-                    </div>
-
-                    <p class="helper-text">
-                        The selected map is stored in the URL, so the link can open this exact view directly.
-                    </p>
-                </section>
-            </aside>
-
-            <section class="map-panel">
-                <div class="map-panel-head">
-                    <div>
-                        <p class="section-label">Map</p>
-                        <h2>Embedded Viewer</h2>
-                    </div>
-                </div>
-
-                <div class="viewer-frame">
-                    <iframe
-                        id="mapFrame"
-                        title="Selected All India OPF map"
-                        loading="lazy"
-                        referrerpolicy="no-referrer-when-downgrade">
-                    </iframe>
-                </div>
-            </section>
-        </main>
+        <section class="map-panel">
+            <iframe
+                id="mapFrame"
+                title="All India LMP map viewer"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        </section>
     </div>
 
     <script src="app.js"></script>
