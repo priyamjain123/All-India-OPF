@@ -41,14 +41,13 @@ body {
 
 .topbar {
     display: grid;
-    grid-template-columns: 1.2fr 1.5fr auto;
-    gap: 18px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 14px;
     align-items: end;
-    padding: 18px 20px;
+    padding: 14px 16px;
     margin-bottom: 18px;
 }
 
-.brand-label,
 .section-label,
 .detail-label,
 .selector-block label {
@@ -60,7 +59,6 @@ body {
     color: var(--muted);
 }
 
-.brand-block h1,
 .sidebar-head h2,
 .map-panel-head h2 {
     margin: 0;
@@ -71,6 +69,7 @@ body {
 .selector-block {
     display: grid;
     gap: 8px;
+    min-width: 0;
 }
 
 .selector-block select {
