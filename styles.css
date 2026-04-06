@@ -122,6 +122,12 @@ body {
     filter: brightness(1.03);
 }
 
+#showMapButton:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    filter: none;
+}
+
 .map-card {
     padding: 16px;
 }

@@ -1,16 +1,16 @@
-const MAPS = [
-    {
-        id: "case-4-nr-active-power",
-        label: "Case 4 | NR Import | Active Power LMPs",
-        title: "Case 4 NR Import Active Power LMPs",
-        file: "Case_4_NR_Import_active_power_lmps_all_india_grid.html"
-    },
-    {
-        id: "case-2-sr-reactive-power",
-        label: "Case 2 | SR Import | Reactive Power LMPs",
-        title: "Case 2 SR Import Reactive Power LMPs",
-        file: "Case_2_SR_Import_reactive_power_lmps_all_india_grid.html"
-    }
+const REPO_OWNER = "priyamjain123";
+const REPO_NAME = "All-India-OPF";
+const CONTENTS_API = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/`;
+
+const FALLBACK_FILES = [
+    "NR Import Case-1_Copper Plate Scenario.html",
+    "NR Import Case-2_Interface + Voltage Limits.html",
+    "NR Import Case-3 Branch Flow + Voltage Limits.html",
+    "NR Import Case-4 Interface + Branch Flow + Voltage Limits (Reduced ATC Case).html",
+    "SR Import Case-1_Copper Plate Scenario.html",
+    "SR Import Case-2_Interface + Voltage Limits.html",
+    "SR Import Case-3 Branch Flow + Voltage Limits.html",
+    "SR Import Case-4 Interface + Branch Flow + Voltage Limits (Reduced ATC Case).html"
 ];
 
 const selector = document.getElementById("mapSelector");
@@ -20,19 +20,34 @@ const selectedMapTitle = document.getElementById("selectedMapTitle");
 const mapStatus = document.getElementById("mapStatus");
 const mapPlaceholder = document.getElementById("mapPlaceholder");
 
-function populateSelector() {
-    MAPS.forEach((map) => {
-        const option = document.createElement("option");
-        option.value = map.id;
-        option.textContent = map.label;
-        selector.appendChild(option);
-    });
+let maps = [];
+
+function slugify(value) {
+    return value
+        .toLowerCase()
+        .replace(/\.html$/i, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
 }
 
-function getSelectedIdFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const requestedId = params.get("map");
-    return MAPS.some((map) => map.id === requestedId) ? requestedId : MAPS[0].id;
+function formatLabel(filename) {
+    return filename
+        .replace(/\.html$/i, "")
+        .replace(/_/g, " | ")
+        .replace(/Case-(\d+)/gi, "Case $1");
+}
+
+function createMapEntry(filename) {
+    return {
+        id: slugify(filename),
+        label: formatLabel(filename),
+        title: filename.replace(/\.html$/i, "").replace(/_/g, " "),
+        file: filename
+    };
+}
+
+function sortMaps(left, right) {
+    return left.label.localeCompare(right.label, undefined, { numeric: true, sensitivity: "base" });
 }
 
 function setQueryString(mapId) {
@@ -41,14 +56,37 @@ function setQueryString(mapId) {
     window.history.replaceState({}, "", url);
 }
 
-function getSelectedMap() {
-    return MAPS.find((map) => map.id === selector.value) || MAPS[0];
+function getSelectedIdFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("map");
 }
 
-function resetStage() {
+function getSelectedMap() {
+    return maps.find((map) => map.id === selector.value) || maps[0] || null;
+}
+
+function renderSelectorOptions() {
+    selector.innerHTML = "";
+
+    maps.forEach((map) => {
+        const option = document.createElement("option");
+        option.value = map.id;
+        option.textContent = map.label;
+        selector.appendChild(option);
+    });
+
+    const requestedId = getSelectedIdFromUrl();
+    const initialMap = maps.find((map) => map.id === requestedId) || maps[0] || null;
+
+    if (initialMap) {
+        selector.value = initialMap.id;
+    }
+}
+
+function resetStage(message = "Ready") {
     const selected = getSelectedMap();
-    selectedMapTitle.textContent = selected.title;
-    mapStatus.textContent = "Ready";
+    selectedMapTitle.textContent = selected ? selected.title : "No scenario maps found";
+    mapStatus.textContent = message;
     mapPlaceholder.classList.remove("hidden");
     frame.removeAttribute("src");
     frame.title = "All India LMP map viewer";
@@ -57,25 +95,75 @@ function resetStage() {
 
 function loadMap() {
     const selected = getSelectedMap();
-    selector.value = selected.id;
-    selectedMapTitle.textContent = selected.title;
+    if (!selected) {
+        selectedMapTitle.textContent = "No scenario maps found";
+        mapStatus.textContent = "Unavailable";
+        return;
+    }
+
     mapStatus.textContent = "Loading";
+    selectedMapTitle.textContent = selected.title;
     mapPlaceholder.classList.add("hidden");
-    frame.src = selected.file;
+    frame.src = encodeURI(selected.file);
     frame.title = selected.title;
     document.title = `All India LMP Map - ${selected.title}`;
     setQueryString(selected.id);
 }
 
-populateSelector();
-selector.value = getSelectedIdFromUrl();
-resetStage();
+async function fetchRepoMaps() {
+    const response = await fetch(CONTENTS_API, {
+        headers: { Accept: "application/vnd.github+json" }
+    });
+
+    if (!response.ok) {
+        throw new Error(`GitHub API returned ${response.status}`);
+    }
+
+    const contents = await response.json();
+    return contents
+        .filter((item) => item.type === "file")
+        .filter((item) => item.name.toLowerCase().endsWith(".html"))
+        .filter((item) => item.name.toLowerCase() !== "index.html")
+        .map((item) => createMapEntry(item.name))
+        .sort(sortMaps);
+}
+
+function getFallbackMaps() {
+    return FALLBACK_FILES.map((filename) => createMapEntry(filename)).sort(sortMaps);
+}
+
+async function initializePage() {
+    selector.disabled = true;
+    showMapButton.disabled = true;
+    mapStatus.textContent = "Loading cases";
+
+    try {
+        maps = await fetchRepoMaps();
+    } catch (error) {
+        maps = getFallbackMaps();
+    }
+
+    renderSelectorOptions();
+    selector.disabled = maps.length === 0;
+    showMapButton.disabled = maps.length === 0;
+
+    if (maps.length === 0) {
+        resetStage("Unavailable");
+        return;
+    }
+
+    resetStage("Ready");
+}
 
 showMapButton.addEventListener("click", loadMap);
-selector.addEventListener("change", resetStage);
+selector.addEventListener("change", () => resetStage("Ready"));
 
 frame.addEventListener("load", () => {
     const selected = getSelectedMap();
     mapStatus.textContent = "Loaded";
-    selectedMapTitle.textContent = selected.title;
+    if (selected) {
+        selectedMapTitle.textContent = selected.title;
+    }
 });
+
+initializePage();
